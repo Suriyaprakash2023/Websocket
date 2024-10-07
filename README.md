@@ -41,7 +41,8 @@ Follow these steps to set up the project on your local machine:
 1. **Clone the repository:**
 
   
-   git clone https://github.com/yourusername/chat-app.git
+   git clone https://github.com/Suriyaprakash2023/Websocket.git
+
 
 2. **Install the required packages from requirements.txt:**
 
