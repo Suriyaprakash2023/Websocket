@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chat App with Sidebar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        /* Styling for the red dot */
+        .red-dot {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            /* display: inline-block; */
+            margin-left: 5px;
+            flex: 1;
+        }
+
+        /* Styling for the chat container */
+        .chat-container {
+            display: flex;
+        }
+
+        /* Styling for the left sidebar */
+        .sidebar {
+            width: 20%;
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+
+        /* Styling for the chat content */
+        .chat-content {
+            width: 80%;
+            background-color: #fff;
+            padding: 10px;
+        }
+
+        /* Styling for the chat messages */
+        .chat-messages {
+            height: 70vh;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        /* Styling for the textarea and send button */
+        .message-input {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+            margin-top: 10px;
+        }
+
+        .send-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        } 
+        .otherchat {
+            background-color: #007bff;
+            color: #fff;
+            max-width: 60%;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px;
+            clear: both;
+            word-wrap: break-word;
+            float: left;
+        }
+
+        .chat-card  {
+            background-color: #e0e0e0;
+            color: #000;
+            max-width: 60%;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px;
+            clear: both;
+            word-wrap: break-word;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="d-flex align-items-start chat-container">
+            <div class="sidebar">
+                <nav class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    {% for frnd in frnds %}
+                    <a class="nav-link" href="/?user={{frnd.username}}" role="tab" aria-controls="v-pills-home" aria-selected="false">{{frnd.username}}</a>
+                    {% endfor %}
+                   </nav>
+            </div>
+            <div class="chat-content">
+                <div class="navbar bg-body-tertiary">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="#">
+                            <h2 id="username">  <span class="red-dot"></span></h2>
+                        </a>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    {% for key, chat in chats.items %}
+                        {% if chat.user == 'me' %}
+                            <div class="chat-card">
+                                <p>{{chat.msg}}</p>
+                            </div>
+                        {% else %}
+                            <div class="otherchat">
+                                <p>{{chat.msg}}</p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div>
+                    <textarea class="message-input" cols="100" rows="3" placeholder="Type your message..."></textarea>
+                    <button class="send-button">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get the query parameter 'user' from the URL
+    const queryParams = new URLSearchParams(window.location.search);
+    const user = queryParams.get("user");
+
+    // Activate the tab based on the 'user' query parameter
+    const tab = document.querySelector(`[href="/?user=${user}"]`);
+    if (tab) {
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        document.getElementById('username').textContent = user;
+    }
+    if (user === null) {
+        const chatContent = document.querySelector('.chat-content');
+        chatContent.style.display = 'none';
+    }
+
+    var sendButton = document.querySelector(".send-button");
+    var textarea = document.querySelector(".message-input"); // Ensure textarea is selected correctly
+    var chatMessages = document.querySelector(".chat-messages");
+    var ws;
+
+    // Ensure textarea is found before proceeding
+    if (!textarea) {
+        console.error("Textarea element not found");
+        return;
+    }
+
+    // Function to append a message to chat messages
+    function appendMessage(userType, message) {
+        const chatCard = document.createElement("div");
+        chatCard.classList.add(userType === "me" ? "chat-card" : "otherchat");
+
+        // HTML structure for the chat messages
+        chatCard.innerHTML = `
+          <ul class="chatappend">
+            <li class="replies">
+              <div class="d-flex">
+                <div class="profile">
+                  <img class="bg-img" src="static/assets/images/contact/2.jpg" alt="Avatar"/>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="contact-name">
+                    <h5>Alan Joseph</h5>
+                    <h6>01:40 AM</h6>
+                    <ul class="msg-box">
+                      <li class="msg-setting-main">
+                        <div class="msg-dropdown-main">
+                          <div class="msg-setting"><i class="ti-more-alt"></i></div>
+                          <div class="msg-dropdown">
+                            <ul>
+                              <li><a href="#"><i class="fa fa-share"></i>forward</a></li>
+                              <li><a href="#"><i class="fa fa-clone"></i>copy</a></li>
+                              <li><a href="#"><i class="fa fa-star-o"></i>rating</a></li>
+                              <li><a href="#"><i class="ti-trash"></i>delete</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                        <h5>${userType === "me" ? "Me" : "Friend"}: ${message}</h5>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
+        `;
+
+        // Append chatCard to the chat container
+        document.getElementById("chat-messages").appendChild(chatCard);
+    }
+
+    // Function to send a message via WebSocket
+    function sendMessage(message) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ user: user, msg: message }));
+        }
+    }
+
+    // Connect to the WebSocket server
+    ws = new WebSocket("ws://127.0.0.1:8000/ws/wsc/");
+
+    // Handle WebSocket connection open
+    ws.addEventListener("open", function () {
+        console.log("WebSocket connection opened.");
+    });
+
+    // Handle WebSocket message received
+    ws.addEventListener("message", function (event) {
+        const receivedMessage = JSON.parse(event.data).msg; // Assuming server sends a JSON response
+        appendMessage("frnd", receivedMessage);
+    });
+
+    // Handle WebSocket close
+    ws.addEventListener("close", function () {
+        console.log("WebSocket connection closed.");
+    });
+
+    // Handle Send button click
+    sendButton.addEventListener('click', function () {
+        // Ensure textarea exists and its value is not null or undefined
+        if (textarea && typeof textarea.value === "string") {
+            const messageText = textarea.value.trim();
+
+            if (messageText !== "") {
+                sendMessage(messageText);
+
+                // Append the sent message to chat messages
+                appendMessage("me", messageText);
+
+                // Clear the textarea
+                textarea.value = "";
+            }
+        } else {
+            console.error("Textarea value is invalid or undefined");
+        }
+    });
+});
+
+    </script>
+</body>
+</html>
