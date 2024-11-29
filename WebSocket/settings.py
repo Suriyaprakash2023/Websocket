@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-c^nxqc&96#=t2imn^l=z31r745%xy^qlmvck^boxrd%lqw#!i*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*",]
 
 
 # Application definition
@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
 
     'chat.middleware.OnlineUserMiddleware',  #My Custom Middleware for online users
+    'whitenoise.middleware.WhiteNoiseMiddleware', # for deploy
 ]
 
 ROOT_URLCONF = 'WebSocket.urls'
@@ -82,22 +83,51 @@ LOGIN_URL = "user_login"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
 
-CHANNEL_LAYERS={
-  "default":{
-    "BACKEND":"channels_redis.core.RedisChannelLayer",
-    "CONFIG":{
-      "hosts":[("redis://127.0.0.1:6379")],
+#Local
+# CHANNEL_LAYERS={
+#   "default":{
+#     "BACKEND":"channels_redis.core.RedisChannelLayer",
+#     "CONFIG":{
+#       "hosts":[("redis://127.0.0.1:6379")],
+#     },
+#   },
+# }
+
+redis://red-ct3sue8gph6c73c2kpj0:6379
+# Use environment variable for Redis URL
+REDIS_URL = os.getenv('REDIS_URL', 'redis://red-ct3sue8gph6c73c2kpj0:6379')  # Fallback to default if not set
+
+
+#Server
+# Django Channels
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [REDIS_URL],
+        },
     },
-  },
 }
+
 
 AUTHENTICATION_BACKENDS = [
     'chat.backends.EmailAuthBackend',  # Add this line
@@ -141,9 +171,9 @@ import os
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static"),
+# ]
 
 STATIC_ROOT=BASE_DIR/"staticfiles"
 
