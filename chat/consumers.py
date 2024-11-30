@@ -2,7 +2,9 @@ import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 # from . models import MyChats
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from time import sleep
 import datetime
 from channels.db import database_sync_to_async
