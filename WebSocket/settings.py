@@ -112,7 +112,7 @@ DATABASES = {
 #   },
 # }
 
-redis://red-ct3sue8gph6c73c2kpj0:6379
+# redis://red-ct3sue8gph6c73c2kpj0:6379
 # Use environment variable for Redis URL
 REDIS_URL = os.getenv('REDIS_URL', 'redis://red-ct3sue8gph6c73c2kpj0:6379')  # Fallback to default if not set
 
