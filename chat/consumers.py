@@ -4,7 +4,7 @@ import json
 # from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 User = get_user_model()
-r
+
 from time import sleep
 import datetime
 from channels.db import database_sync_to_async
