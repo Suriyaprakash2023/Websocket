@@ -8,7 +8,7 @@ pip install -r requirements.txt
 
 # Run migrations to set up the database
  python manage.py collectstatic --noinput
-#python manage.py makemigrations --noinput
+python manage.py makemigrations --noinput
 python manage.py migrate
 #if [[ $CREATE_SUPERUSER ]];
 #then
