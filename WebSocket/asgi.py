@@ -16,11 +16,27 @@ from chat import routing
 django_application = get_asgi_application()
 
 # Configure your WebSocket routing
-application = ApplicationMapping(
-  routes={
-    "http": django_application,
-    "websocket": AuthMiddlewareStack(
-      URLRouter(routing.websocket_urlpatterns)
-    ),
-  }
-)
+# application = ApplicationMapping(
+#   routes={
+#     "http": django_application,
+#     "websocket": AuthMiddlewareStack(
+#       URLRouter(routing.websocket_urlpatterns)
+#     ),
+#   }
+# )
+
+
+# asgi.py
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from django.urls import path
+from yourapp import consumers  # Adjust this import based on your app structure
+
+application = ProtocolTypeRouter({
+  "http": get_asgi_application(),
+  "websocket": AuthMiddlewareStack(
+    URLRouter([
+      path("ws/wsc/", consumers.MychatApp.as_asgi()),
+    ])
+  ),
+})
