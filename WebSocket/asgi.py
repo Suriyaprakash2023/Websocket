@@ -8,9 +8,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'WebSocket.settings')
 django.setup()
 
 from django.core.asgi import get_asgi_application
-from channels.routing import ChannelNameRouter, URLRouter, ApplicationMapping
-from channels.auth import AuthMiddlewareStack
-from chat import routing
+# from channels.routing import ChannelNameRouter, URLRouter, ApplicationMapping
+# from channels.auth import AuthMiddlewareStack
+# from chat import routing
 
 # Get the Django ASGI application
 django_application = get_asgi_application()
@@ -30,7 +30,7 @@ django_application = get_asgi_application()
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from django.urls import path
-from yourapp import consumers  # Adjust this import based on your app structure
+from chat import consumers  # Adjust this import based on your app structure
 
 application = ProtocolTypeRouter({
   "http": get_asgi_application(),
