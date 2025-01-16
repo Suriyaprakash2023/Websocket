@@ -83,7 +83,7 @@
         src = el.attr('src'),
         parent = el.parent();
         parent.css({
-            // 'background-image': 'url(' + src + ')',
+            'background-image': 'url(' + src + ')',
             'background-size': 'cover',
             'background-position': 'center',
             'display': 'block'
@@ -392,39 +392,7 @@
     });
 
     /*=====================
-           13. Customizer
-           ==========================*/
-           
-           $('.cog-click').on('click', function () {
-            $('.setting-sidebar').css("right", "0px");
-        });
-           $(".cog-close").on('click', function () {
-            $('.setting-sidebar').css("right", "-400px");
-        });
-           $(".theme-layout li").on('click', function () {
-            $(".theme-layout li").removeClass('active');
-            $(this).addClass("active");
-            var themeLayout = $(this).attr("data-attr");
-            $("body").attr("class", themeLayout);
-        });
-           var body_event = $("body");
-           body_event.on("click", ".rtl-setting", function () {
-            $(this).toggleClass('rtl');
-            $('body').removeClass('rtl');
-            if ($('.rtl-setting').hasClass('rtl')) {
-                $('.rtl-setting').text('LTR');
-                $('body').addClass('rtl');
-            } else {
-                $('.rtl-setting').text('RTL');
-            }
-            return false;
-        });
-           body_event.on("click", ".themes-content li", function () {
-            $(this).addClass('active').siblings().removeClass('active');
-            $color = $(this).attr("data-attr");
-            $("#color").attr("href", "../assets/css/" + $color + ".css");
-            return false;
-        });
+
 
     /*=====================
     14 footer responsive js
