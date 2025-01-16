@@ -1,15 +1,14 @@
+import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 # from . models import MyChats
-# from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
-User = get_user_model()
-
+from django.contrib.auth.models import User
 from time import sleep
 import datetime
 from channels.db import database_sync_to_async
 
 from chat.models import MyChats
+
 
 
 class MychatApp(AsyncJsonWebsocketConsumer):
@@ -21,24 +20,38 @@ class MychatApp(AsyncJsonWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        message = data['msg']
-        friend_username = data['user']  # The username of the friend the message is being sent to
-        sender_username = self.scope['user'].username  # Current user who is sending the message
 
-        print(f"Message from {sender_username} to {friend_username}: {message}")
+        if 'typing' in data:
+            friend_username = data['user']
+            is_typing = data['typing']
+            sender_username = self.scope['user'].username
 
-        # Send the message to the friend’s WebSocket group
-        await self.channel_layer.group_send(
-            f"chat_{friend_username}",  # Friend's unique WebSocket group
-            {
-                'type': 'send_message',
-                'msg': message,
-                'sender': sender_username
-            }
-        )
+            # Broadcast typing status to the friend's WebSocket group
+            await self.channel_layer.group_send(
+                f"chat_{friend_username}",
+                {
+                    'type': 'typing_status',
+                    'user': sender_username,
+                    'typing': is_typing
+                }
+            )
+        elif 'msg' in data:
+            message = data['msg']
+            friend_username = data['user']
+            sender_username = self.scope['user'].username
 
-        # Optionally save the message to the database
-        await self.save_chat(sender_username, friend_username, message)
+            # Send the message to the friend's WebSocket group
+            await self.channel_layer.group_send(
+                f"chat_{friend_username}",
+                {
+                    'type': 'send_message',
+                    'msg': message,
+                    'sender': sender_username
+                }
+            )
+
+            # Optionally save the message to the database
+            await self.save_chat(sender_username, friend_username, message)
 
     async def send_message(self, event):
         """Receive message from the WebSocket group and send it to the client."""
@@ -49,6 +62,13 @@ class MychatApp(AsyncJsonWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'msg': message,
             'user': sender
+        }))
+
+    async def typing_status(self, event):
+        """Send typing status to WebSocket client."""
+        await self.send(text_data=json.dumps({
+            'typing': event['typing'],  # True or False
+            'user': event['user']       # The user who is typing
         }))
 
     @database_sync_to_async

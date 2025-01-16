@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import os
+from decouple import config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,14 +26,14 @@ SECRET_KEY = 'django-insecure-c^nxqc&96#=t2imn^l=z31r745%xy^qlmvck^boxrd%lqw#!i*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*",]
+ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'channels',
-    'daphne',
+    # 'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,7 +54,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
 
     'chat.middleware.OnlineUserMiddleware',  #My Custom Middleware for online users
-    'whitenoise.middleware.WhiteNoiseMiddleware', # for deploy
+]
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
 ]
 
 ROOT_URLCONF = 'WebSocket.urls'
@@ -75,7 +81,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'WebSocket.wsgi.application'
-ASGI_APPLICATION = 'WebSocket.asgi.application' # add the asgi 
+# ASGI_APPLICATION = 'WebSocket.asgi.application' # add the asgi 
 
 
 LOGIN_URL = "user_login"
@@ -83,51 +89,36 @@ LOGIN_URL = "user_login"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
+#on local 
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('DB_NAME'),
-#         'USER': os.getenv('DB_USER'),
-#         'PASSWORD': 'websocket@123',
-#         'HOST': os.getenv('DB_HOST'),
-#         'PORT': os.getenv('DB_PORT', '5432'),
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
 
+#on Server
 
-#Local
-# CHANNEL_LAYERS={
-#   "default":{
-#     "BACKEND":"channels_redis.core.RedisChannelLayer",
-#     "CONFIG":{
-#       "hosts":[("redis://127.0.0.1:6379")],
-#     },
-#   },
-# }
-
-# redis://red-ct3sue8gph6c73c2kpj0:6379
-# Use environment variable for Redis URL
-REDIS_URL = os.getenv('REDIS_URL', 'redis://red-ct3sue8gph6c73c2kpj0:6379')  # Fallback to default if not set
-
-
-#Server
-# Django Channels
-CHANNEL_LAYERS = {
+DATABASES = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [REDIS_URL],
-        },
-    },
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', default=5432, cast=int),
+    }
 }
 
+
+CHANNEL_LAYERS={
+  "default":{
+    "BACKEND":"channels_redis.core.RedisChannelLayer",
+    "CONFIG":{
+      "hosts":[("redis://127.0.0.1:6379")],
+    }, 
+  },
+}
 
 AUTHENTICATION_BACKENDS = [
     'chat.backends.EmailAuthBackend',  # Add this line

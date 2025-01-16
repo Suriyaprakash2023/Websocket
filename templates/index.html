@@ -209,21 +209,26 @@
     ws = new WebSocket("ws://127.0.0.1:8000/ws/wsc/");
 
     // Handle WebSocket connection open
-    ws.addEventListener("open", function () {
+    ws.onopen = function () {
         console.log("WebSocket connection opened.");
-    });
+    };
 
     // Handle WebSocket message received
-    ws.addEventListener("message", function (event) {
-        const receivedMessage = JSON.parse(event.data).msg; // Assuming server sends a JSON response
+    ws.onmessage = function (event) {
+        const receivedMessage = JSON.parse(event.data).msg;
         appendMessage("frnd", receivedMessage);
-    });
+    };
 
     // Handle WebSocket close
-    ws.addEventListener("close", function () {
-        console.log("WebSocket connection closed.");
-    });
+    ws.onclose = function () {
+        console.error("WebSocket connection closed. Reconnecting...");
+        setTimeout(connectWebSocket, 3000); // Retry after 3 seconds
+    };
 
+    ws.onerror = function (error) {
+        console.error("WebSocket error:", error);
+    };
+    
     // Handle Send button click
     sendButton.addEventListener('click', function () {
         // Ensure textarea exists and its value is not null or undefined
